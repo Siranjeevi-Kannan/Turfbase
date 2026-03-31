@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurfBase — Management Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR
+============================================================ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-brand-tag">Management Panel</div>
+    <div class="sb-brand-name">Turf<span>Base</span></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <button class="sb-item active" onclick="goTo('overview',this)">
+      <span class="sb-dot"></span> Dashboard
+    </button>
+    <div class="sb-section">Records</div>
+    <button class="sb-item" onclick="goTo('users',this)">
+      <span class="sb-dot"></span> Users
+    </button>
+    <button class="sb-item" onclick="goTo('courts',this)">
+      <span class="sb-dot"></span> Courts
+    </button>
+    <button class="sb-item" onclick="goTo('sports',this)">
+      <span class="sb-dot"></span> Sports
+    </button>
+    <button class="sb-item" onclick="goTo('slots',this)">
+      <span class="sb-dot"></span> Slots
+    </button>
+    <button class="sb-item" onclick="goTo('bookings',this)">
+      <span class="sb-dot"></span> Bookings
+    </button>
+    <button class="sb-item" onclick="goTo('payments',this)">
+      <span class="sb-dot"></span> Payments
+    </button>
+    <button class="sb-item" onclick="goTo('staff',this)">
+      <span class="sb-dot"></span> Staff
+    </button>
+    <button class="sb-item" onclick="goTo('feedback',this)">
+      <span class="sb-dot"></span> Feedback
+    </button>
+  </nav>
+  <div class="sb-footer">v3.0 &mdash; TurfBase DB</div>
+</aside>
+
+<!-- ============================================================
+     MAIN
+============================================================ -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-sub">Multi-Sport Turf &amp; Court Booking System</div>
+    </div>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      Connected
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: OVERVIEW
+  ============================================================ -->
+  <div class="page active" id="page-overview">
+    <div class="ph"><h2>Dashboard</h2><p>Live summary of all records in the database</p></div>
+
+    <div class="g5" style="margin-bottom:16px;">
+      <div class="stat-card">
+        <div class="stat-label">Users</div>
+        <div class="stat-val" id="stat-users">—</div>
+        <div class="stat-sub">Registered accounts</div>
+        <div class="stat-bar"><div class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Courts</div>
+        <div class="stat-val" id="stat-courts">—</div>
+        <div class="stat-sub">Active courts</div>
+        <div class="stat-bar"><div class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sports</div>
+        <div class="stat-val" id="stat-sports">—</div>
+        <div class="stat-sub">Sport categories</div>
+        <div class="stat-bar"><div class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bookings</div>
+        <div class="stat-val" id="stat-bookings">—</div>
+        <div class="stat-sub">All-time bookings</div>
+        <div class="stat-bar"><div class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Payments</div>
+        <div class="stat-val" id="stat-payments">—</div>
+        <div class="stat-sub">Transactions</div>
+        <div class="stat-bar"><div class="stat-bar-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">Quick Actions</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="quickNav('users')">Add User</button>
+          <button class="btn btn-primary" onclick="quickNav('courts')">Add Court</button>
+          <button class="btn btn-primary" onclick="quickNav('bookings')">New Booking</button>
+          <button class="btn btn-primary" onclick="quickNav('payments')">Record Payment</button>
+          <button class="btn btn-ghost" onclick="loadStats()">Refresh Stats</button>
+        </div>
+        <div class="div"></div>
+        <div class="card-title">Available Slot Checker</div>
+        <div class="fr">
+          <div class="field" style="margin:0;"><label>Court ID</label><input id="ov-court" placeholder="e.g. C01"></div>
+          <div class="field" style="margin:0;"><label>Date (optional)</label><input id="ov-date" type="date"></div>
+        </div>
+        <div class="bg"><button class="btn btn-outline" onclick="quickSlotCheck()">Check Slots</button></div>
+        <div id="ov-slots" class="sp2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: USERS
+  ============================================================ -->
+  <div class="page" id="page-users">
+    <div class="ph"><h2>User Management</h2><p>Insert, update, and delete user records</p></div>
+    <div class="tabs">
+      <button class="tab active" onclick="tab('users','insert',this)">Insert</button>
+      <button class="tab" onclick="tab('users','update',this)">Update</button>
+      <button class="tab" onclick="tab('users','delete',this)">Delete</button>
+    </div>
+
+    <!-- INSERT -->
+    <div class="tab-pane active" id="users-insert">
+      <div class="card" style="max-width:560px;">
+        <div class="card-title">Insert New User</div>
+        <div class="fr">
+          <div class="field"><label>User ID <span class="fk-note">Primary Key</span></label><input id="u-id" placeholder="e.g. U101"></div>
+          <div class="field"><label>Email</label><input id="u-email" placeholder="user@email.com"></div>
+        </div>
+        <div class="fr">
+          <div class="field"><label>First Name</label><input id="u-fname" placeholder="First name"></div>
+          <div class="field"><label>Last Name</label><input id="u-lname" placeholder="Last name"></div>
+        </div>
+        <div class="wz sp2">
+          <span style="font-size:11px;color:var(--warn);font-weight:700;">Note:</span>
+          <span style="font-size:11px;color:var(--text-mid);"> DOB and Date_Registered are set to today's date automatically by the backend.</span>
+        </div>
+        <div class="bg">
+          <button class="btn btn-primary" onclick="insertUser()">Insert User</button>
+          <button class="btn btn-ghost" onclick="loadUsers()">Refresh Table</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="tab-pane" id="users-update">
+      <div class="card" style="max-width:560px;">
+        <div class="card-title">Update User</div>
+        <div class="pk-hint">🔑 User ID is the primary key — it cannot be changed. Update the other fields below.</div>
+        <div class="field"><label>User ID <span class="fk-note">Required to identify record</span></label><input id="uu-id" placeholder="Enter existing User ID"></div>
+        <div class="fr">
+          <div class="field"><label>New First Name</label><input id="uu-fname" placeholder="Updated first name"></div>
+          <div class="field"><label>New Last Name</label><input id="uu-lname" placeholder="Updated last name"></div>
+        </div>
+        <div class="field"><label>New Email</label><input id="uu-email" placeholder="Updated email address"></div>
+        <div class="bg"><button class="btn btn-outline" onclick="updateUser()">Save Changes</button></div>
+      </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="tab-pane" id="users-delete">
+      <div class="dz" style="max-width:480px;">
+        <div class="card-title red">Delete User</div>
+        <p class="note">Deleting a user will automatically remove all their bookings, payments, feedback entries and phone numbers. A confirmation prompt will appear before anything is deleted.</p>
+        <div class="field"><label>User ID</label><input id="ud-id" placeholder="User ID to delete"></div>
+        <div class="bg"><button class="btn btn-danger" onclick="deleteUser()">Delete User</button></div>
+      </div>
+    </div>
+
+    <div class="tw">
+      <div class="tw-head">
+        <span>User Records</span>
+        <div class="tw-tools">
+          <input class="tw-search" placeholder="Search table..." oninput="filterTable('body-users',this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="loadUsers()">Load / Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>User ID</th><th>First Name</th><th>Last Name</th><th>Email</th><th>DOB</th><th>Registered</th></tr></thead>
+        <tbody id="body-users"><tr><td colspan="6" class="empty-row">Click "Load / Refresh" to view records</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: COURTS
+  ============================================================ -->
+  <div class="page" id="page-courts">
+    <div class="ph"><h2>Court Management</h2><p>Manage court records and availability</p></div>
+    <div class="tabs">
+      <button class="tab active" onclick="tab('courts','insert',this)">Insert</button>
+      <button class="tab" onclick="tab('courts','update',this)">Update</button>
+      <button class="tab" onclick="tab('courts','delete',this)">Delete</button>
+    </div>
+
+    <!-- INSERT -->
+    <div class="tab-pane active" id="courts-insert">
+      <div class="card" style="max-width:580px;">
+        <div class="card-title">Insert New Court</div>
+        <div class="fr">
+          <div class="field"><label>Court ID <span class="fk-note">Primary Key</span></label><input id="c-id" placeholder="e.g. C01"></div>
+          <div class="field"><label>Court Name</label><input id="c-name" placeholder="Champions Turf"></div>
+        </div>
+        <div class="fr3">
+          <div class="field"><label>Block</label><input id="c-block" placeholder="e.g. A"></div>
+          <div class="field"><label>Floor</label><input id="c-floor" placeholder="e.g. Ground"></div>
+          <div class="field"><label>Capacity</label><input id="c-cap" type="number" placeholder="12"></div>
+        </div>
+        <div class="fr">
+          <div class="field"><label>Rate (Rs./hr)</label><input id="c-rate" type="number" placeholder="1200"></div>
+          <div class="field"><label>Status</label>
+            <select id="c-status">
+              <option value="Active">Active</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="bg">
+          <button class="btn btn-primary" onclick="insertCourt()">Insert Court</button>
+          <button class="btn btn-ghost" onclick="loadCourts()">Refresh Table</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="tab-pane" id="courts-update">
+      <div class="card" style="max-width:580px;">
+        <div class="card-title">Update Court</div>
+        <div class="pk-hint">🔑 Court ID is the primary key — it cannot be changed. Update the other fields below.</div>
+        <div class="field"><label>Court ID <span class="fk-note">Required to identify record</span></label><input id="cu-id" placeholder="Enter existing Court ID"></div>
+        <div class="fr">
+          <div class="field"><label>New Court Name</label><input id="cu-name" placeholder="Updated name"></div>
+          <div class="field"><label>New Status</label>
+            <select id="cu-status">
+              <option value="Active">Active</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="fr3">
+          <div class="field"><label>Block</label><input id="cu-block" placeholder="e.g. A"></div>
+          <div class="field"><label>Floor</label><input id="cu-floor" placeholder="e.g. Ground"></div>
+          <div class="field"><label>Capacity</label><input id="cu-cap" type="number" placeholder="12"></div>
+        </div>
+        <div class="field"><label>Rate (Rs./hr)</label><input id="cu-rate" type="number" placeholder="1200"></div>
+        <div class="bg"><button class="btn btn-outline" onclick="updateCourt()">Save Changes</button></div>
+      </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="tab-pane" id="courts-delete">
+      <div class="dz" style="max-width:480px;">
+        <div class="card-title red">Delete Court</div>
+        <p class="note">Deleting a court will automatically remove all its slots, bookings, payments, sport mappings and assigned staff. A confirmation prompt will appear first.</p>
+        <div class="field"><label>Court ID</label><input id="cd-id" placeholder="Court ID to delete"></div>
+        <div class="bg"><button class="btn btn-danger" onclick="deleteCourt()">Delete Court</button></div>
+      </div>
+    </div>
+
+    <div class="tw">
+      <div class="tw-head">
+        <span>Court Records</span>
+        <div class="tw-tools">
+          <input class="tw-search" placeholder="Search table..." oninput="filterTable('body-courts',this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="loadCourts()">Load / Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Court ID</th><th>Name</th><th>Block</th><th>Floor</th><th>Capacity</th><th>Rate</th><th>Status</th></tr></thead>
+        <tbody id="body-courts"><tr><td colspan="7" class="empty-row">Click "Load / Refresh" to view records</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: SPORTS
+  ============================================================ -->
+  <div class="page" id="page-sports">
+    <div class="ph"><h2>Sport Management</h2><p>Define sport categories supported at the facility</p></div>
+    <div class="tabs">
+      <button class="tab active" onclick="tab('sports','insert',this)">Insert</button>
+      <button class="tab" onclick="tab('sports','update',this)">Update</button>
+      <button class="tab" onclick="tab('sports','delete',this)">Delete</button>
+    </div>
+
+    <!-- INSERT -->
+    <div class="tab-pane active" id="sports-insert">
+      <div class="card" style="max-width:520px;">
+        <div class="card-title">Insert New Sport</div>
+        <div class="fr">
+          <div class="field"><label>Sport ID <span class="fk-note">Primary Key</span></label><input id="sp-id" placeholder="e.g. S01"></div>
+          <div class="field"><label>Sport Name</label><input id="sp-name" placeholder="e.g. Football"></div>
+        </div>
+        <div class="field"><label>Required Players</label><input id="sp-players" type="number" placeholder="e.g. 10"></div>
+        <div class="field"><label>Rules</label><textarea id="sp-rules" placeholder="Basic rules for this sport..."></textarea></div>
+        <div class="bg">
+          <button class="btn btn-primary" onclick="insertSport()">Insert Sport</button>
+          <button class="btn btn-ghost" onclick="loadSports()">Refresh Table</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="tab-pane" id="sports-update">
+      <div class="card" style="max-width:520px;">
+        <div class="card-title">Update Sport</div>
+        <div class="pk-hint">🔑 Sport ID is the primary key — it cannot be changed.</div>
+        <div class="field"><label>Sport ID <span class="fk-note">Required to identify record</span></label><input id="su-id" placeholder="Enter existing Sport ID"></div>
+        <div class="field"><label>New Sport Name</label><input id="su-name" placeholder="Updated name"></div>
+        <div class="field"><label>Required Players</label><input id="su-players" type="number" placeholder="Updated player count"></div>
+        <div class="field"><label>Rules</label><textarea id="su-rules" placeholder="Updated rules..."></textarea></div>
+        <div class="bg"><button class="btn btn-outline" onclick="updateSport()">Save Changes</button></div>
+      </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="tab-pane" id="sports-delete">
+      <div class="dz" style="max-width:480px;">
+        <div class="card-title red">Delete Sport</div>
+        <p class="note">Deleting a sport will automatically remove it from all court-sport mappings. A confirmation prompt will appear first.</p>
+        <div class="field"><label>Sport ID</label><input id="sd-id" placeholder="Sport ID to delete"></div>
+        <div class="bg"><button class="btn btn-danger" onclick="deleteSport()">Delete Sport</button></div>
+      </div>
+    </div>
+
+    <div class="tw">
+      <div class="tw-head">
+        <span>Sport Records</span>
+        <div class="tw-tools">
+          <input class="tw-search" placeholder="Search table..." oninput="filterTable('body-sports',this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="loadSports()">Load / Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Sport ID</th><th>Name</th><th>Players</th><th>Rules</th></tr></thead>
+        <tbody id="body-sports"><tr><td colspan="4" class="empty-row">Click "Load / Refresh" to view records</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: SLOTS
+  ============================================================ -->
+  <div class="page" id="page-slots">
+    <div class="ph"><h2>Slot Management</h2><p>View, filter and manage court time slots</p></div>
+    <div class="tabs">
+      <button class="tab active" onclick="tab('slots','browse',this)">Browse / Filter</button>
+      <button class="tab" onclick="tab('slots','insert',this)">Insert Slot</button>
+      <button class="tab" onclick="tab('slots','update',this)">Update Slot</button>
+      <button class="tab" onclick="tab('slots','delete',this)">Delete Slot</button>
+    </div>
+
+    <div class="tab-pane active" id="slots-browse">
+      <div class="card">
+        <div class="card-title">Filter Slots</div>
+        <div class="fr3">
+          <div class="field"><label>Court ID</label><input id="sf-court" placeholder="e.g. C01 (blank = all)"></div>
+          <div class="field"><label>Date</label><input id="sf-date" type="date"></div>
+          <div class="field"><label>Availability</label>
+            <select id="sf-avail">
+              <option value="">All</option>
+              <option value="Available">Available</option>
+              <option value="Booked">Booked</option>
+            </select>
+          </div>
+        </div>
+        <div class="bg">
+          <button class="btn btn-primary" onclick="loadSlots()">Search Slots</button>
+          <button class="btn btn-ghost" onclick="clearSlots()">Clear</button>
+        </div>
+      </div>
+      <div id="slot-visual" class="sp"></div>
+      <div class="tw">
+        <div class="tw-head"><span>Slot Records</span></div>
+        <table>
+          <thead><tr><th>Court ID</th><th>Slot No.</th><th>Date</th><th>Start</th><th>End</th><th>Availability</th></tr></thead>
+          <tbody id="body-slots"><tr><td colspan="6" class="empty-row">Use the filter above to search slots</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="slots-insert">
+      <div class="card" style="max-width:540px;">
+        <div class="card-title">Insert New Slot</div>
+        <div class="wz" style="margin-bottom:12px;">
+          <span style="font-size:11px;color:var(--warn);font-weight:700;">Constraint:</span>
+          <span style="font-size:11px;color:var(--text-mid);"> The Court ID must exist in the COURT table. Slot is identified by the composite key (Court ID + Slot Number).</span>
+        </div>
+        <div class="fr">
+          <div class="field"><label>Court ID <span class="fk-note">FK → COURT</span></label><input id="sli-court" placeholder="e.g. C01"></div>
+          <div class="field"><label>Slot Number <span class="fk-note">Partial Key</span></label><input id="sli-num" type="number" placeholder="e.g. 3"></div>
+        </div>
+        <div class="field"><label>Slot Date</label><input id="sli-date" type="date"></div>
+        <div class="fr">
+          <div class="field"><label>Start Time</label><input id="sli-start" type="time"></div>
+          <div class="field"><label>End Time</label><input id="sli-end" type="time"></div>
+        </div>
+        <div class="field"><label>Availability</label>
+          <select id="sli-avail">
+            <option value="Available">Available</option>
+            <option value="Booked">Booked</option>
+          </select>
+        </div>
+        <div class="bg"><button class="btn btn-primary" onclick="insertSlot()">Insert Slot</button></div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="slots-update">
+      <div class="card" style="max-width:540px;">
+        <div class="card-title">Update Slot</div>
+        <div class="pk-hint">🔑 Court ID + Slot Number form the composite primary key — they cannot be changed. Update the other fields.</div>
+        <div class="fr">
+          <div class="field"><label>Court ID <span class="fk-note">Required</span></label><input id="slu-court" placeholder="e.g. C01"></div>
+          <div class="field"><label>Slot Number <span class="fk-note">Required</span></label><input id="slu-num" type="number" placeholder="e.g. 2"></div>
+        </div>
+        <div class="field"><label>New Availability</label>
+          <select id="slu-avail">
+            <option value="Available">Available</option>
+            <option value="Booked">Booked</option>
+          </select>
+        </div>
+        <div class="field"><label>New Slot Date</label><input id="slu-date" type="date"></div>
+        <div class="fr">
+          <div class="field"><label>New Start Time</label><input id="slu-start" type="time"></div>
+          <div class="field"><label>New End Time</label><input id="slu-end" type="time"></div>
+        </div>
+        <div class="bg"><button class="btn btn-outline" onclick="updateSlot()">Save Changes</button></div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="slots-delete">
+      <div class="dz" style="max-width:480px;">
+        <div class="card-title red">Delete Slot</div>
+        <p class="note">Deleting a slot will automatically remove any booking and payment linked to it. A confirmation prompt will appear first.</p>
+        <div class="fr">
+          <div class="field"><label>Court ID</label><input id="sld-court" placeholder="e.g. C01"></div>
+          <div class="field"><label>Slot Number</label><input id="sld-num" type="number" placeholder="e.g. 2"></div>
+        </div>
+        <div class="bg"><button class="btn btn-danger" onclick="deleteSlot()">Delete Slot</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: BOOKINGS
+  ============================================================ -->
+  <div class="page" id="page-bookings">
+    <div class="ph"><h2>Booking Management</h2><p>Create and manage court reservations</p></div>
+    <div class="tabs">
+      <button class="tab active" onclick="tab('bookings','insert',this)">Insert</button>
+      <button class="tab" onclick="tab('bookings','update',this)">Update</button>
+      <button class="tab" onclick="tab('bookings','delete',this)">Delete</button>
+    </div>
+
+    <!-- INSERT -->
+    <div class="tab-pane active" id="bookings-insert">
+      <div class="card" style="max-width:540px;">
+        <div class="card-title">New Booking</div>
+        <div class="fr">
+          <div class="field"><label>Booking ID <span class="fk-note">Primary Key</span></label><input id="b-id" placeholder="e.g. B1001"></div>
+          <div class="field"><label>Status</label>
+            <select id="b-status">
+              <option value="Confirmed">Confirmed</option>
+              <option value="Pending">Pending</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="fr">
+          <div class="field"><label>User ID <span class="fk-note">FK → USER_INFO</span></label><input id="b-user" placeholder="Linked User ID"></div>
+          <div class="field"><label>Court ID <span class="fk-note">FK → COURT</span></label><input id="b-court" placeholder="Linked Court ID"></div>
+        </div>
+        <div class="field"><label>Slot Number <span class="fk-note">FK → SLOT</span></label><input id="b-slot" type="number" placeholder="Linked Slot Number"></div>
+        <div class="wz sp2">
+          <span style="font-size:11px;color:var(--warn);font-weight:700;">Constraint:</span>
+          <span style="font-size:11px;color:var(--text-mid);"> The (Court ID, Slot Number) pair must already exist in the SLOT table. The slot will not be marked as booked automatically — update it separately.</span>
+        </div>
+        <div class="bg">
+          <button class="btn btn-primary" onclick="insertBooking()">Insert Booking</button>
+          <button class="btn btn-ghost" onclick="loadBookings()">Refresh Table</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="tab-pane" id="bookings-update">
+      <div class="card" style="max-width:480px;">
+        <div class="card-title">Update Booking</div>
+        <div class="pk-hint">🔑 Booking ID is the primary key. User, Court and Slot are foreign keys — these cannot be changed after creation. Only the status can be updated.</div>
+        <div class="field"><label>Booking ID <span class="fk-note">Required</span></label><input id="bu-id" placeholder="Enter existing Booking ID"></div>
+        <div class="field"><label>New Status</label>
+          <select id="bu-status">
+            <option value="Confirmed">Confirmed</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="bg"><button class="btn btn-outline" onclick="updateBooking()">Save Changes</button></div>
+      </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="tab-pane" id="bookings-delete">
+      <div class="dz" style="max-width:480px;">
+        <div class="card-title red">Delete Booking</div>
+        <p class="note">Deleting a booking will automatically remove the linked payment record. A confirmation prompt will appear first.</p>
+        <div class="field"><label>Booking ID</label><input id="bd-id" placeholder="Booking ID to delete"></div>
+        <div class="bg"><button class="btn btn-danger" onclick="deleteBooking()">Delete Booking</button></div>
+      </div>
+    </div>
+
+    <div class="tw">
+      <div class="tw-head">
+        <span>Booking Records</span>
+        <div class="tw-tools">
+          <input class="tw-search" placeholder="Search table..." oninput="filterTable('body-bookings',this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="loadBookings()">Load / Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Booking ID</th><th>Date</th><th>Status</th><th>User ID</th><th>Court ID</th><th>Slot No.</th></tr></thead>
+        <tbody id="body-bookings"><tr><td colspan="6" class="empty-row">Click "Load / Refresh" to view records</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: PAYMENTS
+  ============================================================ -->
+  <div class="page" id="page-payments">
+    <div class="ph"><h2>Payment Management</h2><p>Record and manage booking payments</p></div>
+    <div class="tabs">
+      <button class="tab active" onclick="tab('payments','insert',this)">Insert</button>
+      <button class="tab" onclick="tab('payments','update',this)">Update</button>
+      <button class="tab" onclick="tab('payments','delete',this)">Delete</button>
+    </div>
+
+    <!-- INSERT -->
+    <div class="tab-pane active" id="payments-insert">
+      <div class="card" style="max-width:540px;">
+        <div class="card-title">Record Payment</div>
+        <div class="fr">
+          <div class="field"><label>Payment ID <span class="fk-note">Primary Key</span></label><input id="p-id" placeholder="e.g. P9001"></div>
+          <div class="field"><label>Amount (Rs.)</label><input id="p-amount" type="number" placeholder="e.g. 1200"></div>
+        </div>
+        <div class="fr">
+          <div class="field"><label>Payment Method</label>
+            <select id="p-method">
+              <option value="UPI">UPI</option>
+              <option value="Cash">Cash</option>
+              <option value="Card">Card</option>
+              <option value="Net Banking">Net Banking</option>
+            </select>
+          </div>
+          <div class="field"><label>Status</label>
+            <select id="p-status">
+              <option value="Success">Success</option>
+              <option value="Pending">Pending</option>
+              <option value="Failed">Failed</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Booking ID <span class="fk-note">FK → BOOKING (1:1)</span></label><input id="p-booking" placeholder="Linked Booking ID"></div>
+        <div class="wz sp2">
+          <span style="font-size:11px;color:var(--warn);font-weight:700;">Constraint:</span>
+          <span style="font-size:11px;color:var(--text-mid);"> Each booking can only have one payment — the Booking ID is unique in this table.</span>
+        </div>
+        <div class="bg">
+          <button class="btn btn-primary" onclick="insertPayment()">Insert Payment</button>
+          <button class="btn btn-ghost" onclick="loadPayments()">Refresh Table</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="tab-pane" id="payments-update">
+      <div class="card" style="max-width:520px;">
+        <div class="card-title">Update Payment</div>
+        <div class="pk-hint">🔑 Payment ID is the primary key. Booking ID is a foreign key — neither can be changed. Update the financial details below.</div>
+        <div class="field"><label>Payment ID <span class="fk-note">Required</span></label><input id="pu-id" placeholder="Enter existing Payment ID"></div>
+        <div class="field"><label>New Amount (Rs.)</label><input id="pu-amount" type="number" placeholder="Updated amount"></div>
+        <div class="fr">
+          <div class="field"><label>New Method</label>
+            <select id="pu-method">
+              <option value="UPI">UPI</option>
+              <option value="Cash">Cash</option>
+              <option value="Card">Card</option>
+              <option value="Net Banking">Net Banking</option>
+            </select>
+          </div>
+          <div class="field"><label>New Status</label>
+            <select id="pu-status">
+              <option value="Success">Success</option>
+              <option value="Pending">Pending</option>
+              <option value="Failed">Failed</option>
+            </select>
+          </div>
+        </div>
+        <div class="bg"><button class="btn btn-outline" onclick="updatePayment()">Save Changes</button></div>
+      </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="tab-pane" id="payments-delete">
+      <div class="dz" style="max-width:480px;">
+        <div class="card-title red">Delete Payment</div>
+        <p class="note">Deleting a payment only removes the payment record — the associated booking remains untouched. A confirmation prompt will appear first.</p>
+        <div class="field"><label>Payment ID</label><input id="pd-id" placeholder="Payment ID to delete"></div>
+        <div class="bg"><button class="btn btn-danger" onclick="deletePayment()">Delete Payment</button></div>
+      </div>
+    </div>
+
+    <div class="tw">
+      <div class="tw-head">
+        <span>Payment Records</span>
+        <div class="tw-tools">
+          <input class="tw-search" placeholder="Search table..." oninput="filterTable('body-payments',this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="loadPayments()">Load / Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Payment ID</th><th>Date</th><th>Amount</th><th>Method</th><th>Status</th><th>Booking ID</th></tr></thead>
+        <tbody id="body-payments"><tr><td colspan="6" class="empty-row">Click "Load / Refresh" to view records</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: STAFF
+  ============================================================ -->
+  <div class="page" id="page-staff">
+    <div class="ph"><h2>Staff Management</h2><p>View and manage staff members assigned to courts</p></div>
+    <div class="tabs">
+      <button class="tab active" onclick="tab('staff','insert',this)">Insert</button>
+      <button class="tab" onclick="tab('staff','update',this)">Update</button>
+      <button class="tab" onclick="tab('staff','delete',this)">Delete</button>
+    </div>
+
+    <!-- INSERT -->
+    <div class="tab-pane active" id="staff-insert">
+      <div class="card" style="max-width:540px;">
+        <div class="card-title">Insert Staff Member</div>
+        <div class="fr">
+          <div class="field"><label>Staff ID <span class="fk-note">Primary Key</span></label><input id="st-id" placeholder="e.g. ST01"></div>
+          <div class="field"><label>Staff Name</label><input id="st-name" placeholder="Full name"></div>
+        </div>
+        <div class="fr">
+          <div class="field"><label>Role</label><input id="st-role" placeholder="e.g. Manager"></div>
+          <div class="field"><label>Court ID <span class="fk-note">FK → COURT</span></label><input id="st-court" placeholder="e.g. C01"></div>
+        </div>
+        <div class="bg">
+          <button class="btn btn-primary" onclick="insertStaff()">Insert Staff</button>
+          <button class="btn btn-ghost" onclick="loadStaff()">Refresh Table</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="tab-pane" id="staff-update">
+      <div class="card" style="max-width:520px;">
+        <div class="card-title">Update Staff</div>
+        <div class="pk-hint">🔑 Staff ID is the primary key. Court ID is a foreign key — neither can be changed here. Update name and role below.</div>
+        <div class="field"><label>Staff ID <span class="fk-note">Required</span></label><input id="stu-id" placeholder="Enter existing Staff ID"></div>
+        <div class="field"><label>New Staff Name</label><input id="stu-name" placeholder="Updated name"></div>
+        <div class="field"><label>New Role</label><input id="stu-role" placeholder="Updated role"></div>
+        <div class="bg"><button class="btn btn-outline" onclick="updateStaff()">Save Changes</button></div>
+      </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="tab-pane" id="staff-delete">
+      <div class="dz" style="max-width:480px;">
+        <div class="card-title red">Delete Staff</div>
+        <p class="note">Deleting a staff member will automatically remove all their contact numbers. A confirmation prompt will appear first.</p>
+        <div class="field"><label>Staff ID</label><input id="std-id" placeholder="Staff ID to delete"></div>
+        <div class="bg"><button class="btn btn-danger" onclick="deleteStaff()">Delete Staff</button></div>
+      </div>
+    </div>
+
+    <div class="tw">
+      <div class="tw-head">
+        <span>Staff Records</span>
+        <div class="tw-tools">
+          <input class="tw-search" placeholder="Search table..." oninput="filterTable('body-staff',this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="loadStaff()">Load / Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Staff ID</th><th>Name</th><th>Role</th><th>Court ID</th></tr></thead>
+        <tbody id="body-staff"><tr><td colspan="4" class="empty-row">Click "Load / Refresh" to view records</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: FEEDBACK
+  ============================================================ -->
+  <div class="page" id="page-feedback">
+    <div class="ph"><h2>Feedback Management</h2><p>View and manage user feedback and ratings</p></div>
+    <div class="tabs">
+      <button class="tab active" onclick="tab('feedback','insert',this)">Insert</button>
+      <button class="tab" onclick="tab('feedback','update',this)">Update</button>
+      <button class="tab" onclick="tab('feedback','delete',this)">Delete</button>
+    </div>
+
+    <!-- INSERT -->
+    <div class="tab-pane active" id="feedback-insert">
+      <div class="card" style="max-width:520px;">
+        <div class="card-title">Insert Feedback</div>
+        <div class="fr">
+          <div class="field"><label>Feedback ID <span class="fk-note">Primary Key</span></label><input id="f-id" placeholder="e.g. F501"></div>
+          <div class="field"><label>User ID <span class="fk-note">FK → USER_INFO</span></label><input id="f-user" placeholder="Linked User ID"></div>
+        </div>
+        <div class="field"><label>Rating (1 – 5)</label><input id="f-rating" type="number" min="1" max="5" placeholder="e.g. 5"></div>
+        <div class="field"><label>Comments</label><textarea id="f-comments" placeholder="User feedback comments..."></textarea></div>
+        <div class="bg">
+          <button class="btn btn-primary" onclick="insertFeedback()">Submit Feedback</button>
+          <button class="btn btn-ghost" onclick="loadFeedback()">Refresh Table</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="tab-pane" id="feedback-update">
+      <div class="card" style="max-width:520px;">
+        <div class="card-title">Update Feedback</div>
+        <div class="pk-hint">🔑 Feedback ID is the primary key. User ID is a foreign key — neither can be changed. Update the rating and comments below.</div>
+        <div class="field"><label>Feedback ID <span class="fk-note">Required</span></label><input id="fu-id" placeholder="Enter existing Feedback ID"></div>
+        <div class="field"><label>New Rating (1 – 5)</label><input id="fu-rating" type="number" min="1" max="5" placeholder="Updated rating"></div>
+        <div class="field"><label>New Comments</label><textarea id="fu-comments" placeholder="Updated comments..."></textarea></div>
+        <div class="bg"><button class="btn btn-outline" onclick="updateFeedback()">Save Changes</button></div>
+      </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="tab-pane" id="feedback-delete">
+      <div class="dz" style="max-width:480px;">
+        <div class="card-title red">Delete Feedback</div>
+        <p class="note">This removes only the feedback record — the user account remains untouched. A confirmation prompt will appear first.</p>
+        <div class="field"><label>Feedback ID</label><input id="fd-id" placeholder="Feedback ID to delete"></div>
+        <div class="bg"><button class="btn btn-danger" onclick="deleteFeedback()">Delete Feedback</button></div>
+      </div>
+    </div>
+
+    <div class="tw">
+      <div class="tw-head">
+        <span>Feedback Records</span>
+        <div class="tw-tools">
+          <input class="tw-search" placeholder="Search table..." oninput="filterTable('body-feedback',this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="loadFeedback()">Load / Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Feedback ID</th><th>Rating</th><th>Comments</th><th>Date</th><th>User ID</th></tr></thead>
+        <tbody id="body-feedback"><tr><td colspan="5" class="empty-row">Click "Load / Refresh" to view records</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast-container"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
